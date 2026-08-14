@@ -8,6 +8,7 @@
 	import { injectCsp } from '$lib/utils/csp';
 
 	import XMark from '$lib/components/icons/XMark.svelte';
+	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
 
 	const i18n = getContext('i18n');
@@ -19,6 +20,7 @@
 	export let citation;
 	export let showPercentage = false;
 	export let showRelevance = true;
+	export let onOpenPanel: (() => void) | null = null;
 
 	let mergedDocuments = [];
 
@@ -129,15 +131,26 @@
 					{$i18n.t('Citation')}
 				{/if}
 			</div>
-			<button
-				class="self-center"
-				aria-label={$i18n.t('Close citation modal')}
-				on:click={() => {
-					show = false;
-				}}
-			>
-				<XMark className={'size-5'} />
-			</button>
+			<div class="flex items-center gap-3 self-center">
+				{#if onOpenPanel}
+					<button
+						class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+						aria-label="출처를 우측 패널로 보기"
+						title="출처를 우측 패널로 보기"
+						on:click={onOpenPanel}
+					>
+						<Sidebar className="size-4" />
+					</button>
+				{/if}
+				<button
+					aria-label={$i18n.t('Close citation modal')}
+					on:click={() => {
+						show = false;
+					}}
+				>
+					<XMark className={'size-5'} />
+				</button>
+			</div>
 		</div>
 
 		<div class="flex flex-col md:flex-row w-full px-5 pb-5 md:space-x-4">

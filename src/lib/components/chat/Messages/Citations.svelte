@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { embed, showControls, showEmbeds } from '$lib/stores';
+	import { embed, showControls, showEmbeds, showSources, sourcesPanel } from '$lib/stores';
+	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 
 	import CitationModal from './Citations/CitationModal.svelte';
 
@@ -12,7 +13,7 @@
 	export let sources = [];
 	export let readOnly = false;
 
-	let citations = [];
+	let citations: any[] = [];
 	let showPercentage = false;
 	let showRelevance = true;
 
@@ -22,6 +23,20 @@
 	let showCitationModal = false;
 
 	let selectedCitation: any = null;
+
+	const openSourcesPanel = (focusIdx: number | null = null) => {
+		sourcesPanel.set({ citations, messageId: id, chatId, focusIdx });
+		showEmbeds.set(false);
+		showSources.set(true);
+		showControls.set(true);
+	};
+
+	// 스트리밍 중 새 source가 도착하면 열려 있는 패널(같은 메시지)에 반영.
+	// 참조 비교 가드 필수 — update가 store를 새 객체로 바꾸므로 가드 없이는
+	// 이 반응문이 자기 자신을 다시 트리거해 무한 루프가 된다.
+	$: if ($showSources && $sourcesPanel?.messageId === id && $sourcesPanel.citations !== citations) {
+		sourcesPanel.update((p) => (p ? { ...p, citations } : p));
+	}
 
 	export const showSourceModal = (sourceId) => {
 		let index;
@@ -156,6 +171,10 @@
 	citation={selectedCitation}
 	{showPercentage}
 	{showRelevance}
+	onOpenPanel={() => {
+		showCitationModal = false;
+		openSourcesPanel(citations.indexOf(selectedCitation));
+	}}
 />
 
 {#if citations.length > 0}
@@ -202,6 +221,14 @@
 					})}
 				{/if}
 			</div>
+		</button>
+		<button
+			class="text-xs font-medium text-gray-600 dark:text-gray-300 px-2 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center border border-gray-50 dark:border-gray-850/30"
+			aria-label="출처를 우측 패널로 보기"
+			title="출처를 우측 패널로 보기"
+			on:click={() => openSourcesPanel()}
+		>
+			<Sidebar className="size-4" />
 		</button>
 	</div>
 {/if}
