@@ -43,6 +43,8 @@
 		functions,
 		selectedFolder,
 		showEmbeds,
+		showSources,
+		sourcesPanel,
 		selectedTerminalId,
 		showFileNavPath,
 		showFileNavDir,
@@ -1948,6 +1950,8 @@
 				showCallOverlay.set(false);
 				showArtifacts.set(false);
 				showEmbeds.set(false);
+				showSources.set(false);
+				sourcesPanel.set(null);
 			}
 		});
 
