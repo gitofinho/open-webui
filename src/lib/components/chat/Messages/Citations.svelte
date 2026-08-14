@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { embed, showArtifacts, showControls, showEmbeds, showSources, sourcesPanel } from '$lib/stores';
+	import {
+		embed,
+		mobile,
+		showArtifacts,
+		showControls,
+		showEmbeds,
+		showSources,
+		sourcesPanel
+	} from '$lib/stores';
 	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 
 	import CitationModal from './Citations/CitationModal.svelte';
@@ -11,7 +19,19 @@
 	export let chatId = '';
 
 	export let sources = [];
+	export let done = true;
 	export let readOnly = false;
+
+	// hfx: 이 세션에서 스트리밍된 답변이 끝나면 출처 패널을 자동으로 연다.
+	// 저장된 채팅은 done=true로 마운트되어 wasStreaming이 서지 않으므로 안 열린다.
+	// 모바일은 Drawer가 화면 전체를 덮어 자동 오픈이 오히려 방해라 제외.
+	let wasStreaming = false;
+	let autoOpened = false;
+	$: if (!done) wasStreaming = true;
+	$: if (done && wasStreaming && !autoOpened && !readOnly && !$mobile && citations.length > 0) {
+		autoOpened = true;
+		openSourcesPanel();
+	}
 
 	let citations: any[] = [];
 	let showPercentage = false;

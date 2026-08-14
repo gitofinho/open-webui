@@ -894,6 +894,7 @@
 									id={message?.id}
 									{chatId}
 									sources={message?.sources ?? message?.citations}
+									done={message?.done ?? true}
 									{readOnly}
 								/>
 							{/if}
