@@ -34,11 +34,17 @@
 	// 발췌는 평문으로만 — 마크다운 렌더링은 출처마다(법령 조문 제목·목록, 웹 발췌)
 	// 타이포를 제각각 흔들어 카드 통일감을 깨므로, 패널은 스니펫 평문이고
 	// 전문 마크다운은 모달이 담당한다.
-	const excerptText = (citation: any) =>
-		(citation.document ?? [])
+	// 모달의 CONTENT_PREVIEW_LIMIT와 같은 값 — 아주 긴 발췌로 DOM이 비대해지는 것을
+	// 막는다. 잘리면 말줄임만 붙인다(전문은 모달에서 본다).
+	const EXCERPT_LIMIT = 10000;
+
+	const excerptText = (citation: any) => {
+		const text = (citation.document ?? [])
 			.join('\n\n')
 			.replace(/\n{3,}/g, '\n\n')
 			.trim();
+		return text.length > EXCERPT_LIMIT ? `${text.slice(0, EXCERPT_LIMIT)} …` : text;
+	};
 
 	const toggle = (idx: number) => {
 		if (expanded.has(idx)) {

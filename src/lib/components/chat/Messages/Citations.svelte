@@ -45,7 +45,7 @@
 	let selectedCitation: any = null;
 
 	const openSourcesPanel = (focusIdx: number | null = null) => {
-		sourcesPanel.set({ citations, messageId: id, chatId, focusIdx });
+		sourcesPanel.set({ citations, messageId: id, focusIdx });
 		showEmbeds.set(false);
 		showArtifacts.set(false);
 		showSources.set(true);

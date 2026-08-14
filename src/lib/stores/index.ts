@@ -115,7 +115,6 @@ export const embed = writable(null);
 export const sourcesPanel: Writable<{
 	citations: any[];
 	messageId: string;
-	chatId: string;
 	focusIdx: number | null;
 } | null> = writable(null);
 
