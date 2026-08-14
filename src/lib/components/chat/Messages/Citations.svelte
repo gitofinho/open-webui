@@ -130,7 +130,9 @@
 				}
 
 				if (id.startsWith('http://') || id.startsWith('https://')) {
-					_source = { ..._source, name: id, url: id };
+					// hfx: 병합 키가 URL이어도 이미 있는 제목(name)을 URL로 덮어쓰지 않는다 —
+					// pipe가 보낸 HTML title이 표시 이름이고, URL은 url 필드로만 쓴다.
+					_source = { ..._source, name: _source?.name ?? id, url: _source?.url ?? id };
 				}
 
 				const existingSource = acc.find((item) => item.id === id);
@@ -179,7 +181,7 @@
 />
 
 {#if citations.length > 0}
-	{@const urlCitations = citations.filter((c) => c?.source?.name?.startsWith('http'))}
+	{@const urlCitations = citations.filter((c) => c?.source?.url)}
 	<div class=" py-1 -mx-0.5 w-full flex gap-1 items-center flex-wrap">
 		<button
 			class="text-xs font-medium text-gray-600 dark:text-gray-300 px-3.5 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-1 border border-gray-50 dark:border-gray-850/30"
@@ -195,7 +197,7 @@
 				<div class="flex -space-x-1 items-center">
 					{#each urlCitations.slice(0, 3) as citation, idx}
 						<img
-							src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.name}"
+							src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.url}"
 							alt="favicon"
 							class="size-4 rounded-full shrink-0 border border-white dark:border-gray-850 bg-white dark:bg-gray-900"
 							on:error={(e) => {

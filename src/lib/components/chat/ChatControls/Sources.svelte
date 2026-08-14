@@ -9,6 +9,8 @@
 	let panelEl: HTMLElement | null = null;
 	let expanded: Set<number> = new Set();
 	let focusIdx: number | null = null;
+	// favicon 로드 실패(내부망에서 구글 favicon 서비스 차단 등) 시 글자 아바타 폴백
+	let iconFailed: Set<number> = new Set();
 
 	const decodeString = (str: string) => {
 		try {
@@ -57,6 +59,7 @@
 			panelKey = key;
 			focusIdx = $sourcesPanel.focusIdx ?? null;
 			expanded = new Set(focusIdx !== null ? [focusIdx] : []);
+			iconFailed = new Set();
 			tick().then(() => {
 				if (focusIdx !== null) {
 					panelEl
@@ -103,6 +106,25 @@
 						<span class="font-medium bg-gray-50 dark:bg-gray-850 rounded px-1 shrink-0">
 							{idx + 1}
 						</span>
+						{#if citation.source?.url}
+							{#if !iconFailed.has(idx)}
+								<img
+									src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.url}"
+									alt=""
+									class="size-4 rounded-sm shrink-0"
+									on:error={() => {
+										iconFailed.add(idx);
+										iconFailed = iconFailed;
+									}}
+								/>
+							{:else}
+								<span
+									class="size-4 rounded-sm shrink-0 bg-gray-100 dark:bg-gray-800 text-[9px] font-semibold flex items-center justify-center"
+								>
+									{typeBadge(citation.source?.url).charAt(0).toUpperCase()}
+								</span>
+							{/if}
+						{/if}
 						<span class="truncate">{typeBadge(citation.source?.url)}</span>
 					</div>
 					{#if citation.source?.url}

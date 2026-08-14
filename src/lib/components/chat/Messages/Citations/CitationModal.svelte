@@ -22,6 +22,10 @@
 	export let showRelevance = true;
 	export let onOpenPanel: (() => void) | null = null;
 
+	// favicon 로드 실패(내부망 등) 시 아이콘만 숨긴다
+	let iconError = false;
+	$: if (citation) iconError = false;
+
 	let mergedDocuments = [];
 
 	function calculatePercentage(distance: number) {
@@ -109,7 +113,17 @@
 <Modal size="full" bind:show className="bg-white dark:bg-gray-900 rounded-4xl">
 	<div>
 		<div class=" flex justify-between dark:text-gray-300 px-4.5 pt-3 pb-2">
-			<div class=" text-lg font-medium self-center flex items-center">
+			<div class=" text-lg font-medium self-center flex items-center gap-2 min-w-0">
+				{#if citation?.source?.url && !iconError}
+					<img
+						src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.url}"
+						alt=""
+						class="size-4.5 rounded-sm shrink-0"
+						on:error={() => {
+							iconError = true;
+						}}
+					/>
+				{/if}
 				{#if citation?.source?.name}
 					{@const document = mergedDocuments?.[0]}
 					{#if document?.metadata?.file_id || document.source?.url?.includes('http')}
