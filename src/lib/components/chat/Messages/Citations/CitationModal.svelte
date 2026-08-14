@@ -9,6 +9,7 @@
 	import { isValidHttpUrl } from '$lib/utils';
 
 	import XMark from '$lib/components/icons/XMark.svelte';
+	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
 
 	const i18n = getContext('i18n');
@@ -20,6 +21,7 @@
 	export let citation;
 	export let showPercentage = false;
 	export let showRelevance = true;
+	export let onOpenPanel: (() => void) | null = null;
 
 	let mergedDocuments = [];
 
@@ -130,15 +132,27 @@
 					{$i18n.t('Citation')}
 				{/if}
 			</div>
-			<button
-				class="self-center rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-				aria-label={$i18n.t('Close citation modal')}
-				on:click={() => {
-					show = false;
-				}}
-			>
-				<XMark className={'size-4'} />
-			</button>
+			<div class="flex items-center gap-2 self-center">
+				{#if onOpenPanel}
+					<button
+						class="rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+						aria-label="출처를 우측 패널로 보기"
+						title="출처를 우측 패널로 보기"
+						on:click={onOpenPanel}
+					>
+						<Sidebar className="size-4" />
+					</button>
+				{/if}
+				<button
+					class="rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+					aria-label={$i18n.t('Close citation modal')}
+					on:click={() => {
+						show = false;
+					}}
+				>
+					<XMark className={'size-4'} />
+				</button>
+			</div>
 		</div>
 
 		<div class="flex flex-col md:flex-row w-full px-5 pb-5 md:space-x-4">
