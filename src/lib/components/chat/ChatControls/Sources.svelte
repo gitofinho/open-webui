@@ -2,7 +2,6 @@
 	import { tick } from 'svelte';
 	import { showControls, showSources, sourcesPanel } from '$lib/stores';
 
-	import Markdown from '$lib/components/chat/Messages/Markdown.svelte';
 	import XMark from '$lib/components/icons/XMark.svelte';
 
 	export let overlay = false;
@@ -29,6 +28,15 @@
 			return '문서';
 		}
 	};
+
+	// 발췌는 평문으로만 — 마크다운 렌더링은 출처마다(법령 조문 제목·목록, 웹 발췌)
+	// 타이포를 제각각 흔들어 카드 통일감을 깨므로, 패널은 스니펫 평문이고
+	// 전문 마크다운은 모달이 담당한다.
+	const excerptText = (citation: any) =>
+		(citation.document ?? [])
+			.join('\n\n')
+			.replace(/\n{3,}/g, '\n\n')
+			.trim();
 
 	const toggle = (idx: number) => {
 		if (expanded.has(idx)) {
@@ -91,51 +99,42 @@
 						? 'border-gray-300 dark:border-gray-600'
 						: 'border-gray-100 dark:border-gray-850'}"
 				>
-					<div class="flex items-center gap-2 mb-1.5 min-w-0">
-						<div
-							class="text-xs font-medium bg-gray-50 dark:bg-gray-850 rounded-md px-1.5 py-0.5 shrink-0"
-						>
+					<div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 min-w-0">
+						<span class="font-medium bg-gray-50 dark:bg-gray-850 rounded px-1 shrink-0">
 							{idx + 1}
-						</div>
-						{#if citation.source?.url}
-							<a
-								class="text-sm font-medium truncate hover:underline dark:text-gray-100"
-								href={citation.source.url}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								{decodeString(citation.source?.name ?? '출처')}
-							</a>
-						{:else}
-							<div class="text-sm font-medium truncate dark:text-gray-100">
-								{decodeString(citation.source?.name ?? '출처')}
-							</div>
-						{/if}
-						<div class="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-auto">
-							{typeBadge(citation.source?.url)}
-						</div>
+						</span>
+						<span class="truncate">{typeBadge(citation.source?.url)}</span>
 					</div>
-
-					<div
-						class="text-sm prose dark:prose-invert markdown-prose-sm min-w-full max-w-full overflow-hidden {expanded.has(
-							idx
-						)
-							? ''
-							: 'max-h-24'}"
-					>
-						{#each citation.document as doc, docIdx}
-							{#if docIdx > 0}
-								<hr class="my-2" />
-							{/if}
-							<Markdown content={doc} id="source-panel-{idx}-{docIdx}" />
-						{/each}
-					</div>
+					{#if citation.source?.url}
+						<a
+							class="mt-1 block text-sm font-medium leading-snug line-clamp-2 text-gray-900 dark:text-gray-100 hover:underline"
+							href={citation.source.url}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{decodeString(citation.source?.name ?? '출처')}
+						</a>
+					{:else}
+						<div
+							class="mt-1 text-sm font-medium leading-snug line-clamp-2 text-gray-900 dark:text-gray-100"
+						>
+							{decodeString(citation.source?.name ?? '출처')}
+						</div>
+					{/if}
 					<button
-						class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+						class="mt-1 w-full text-left"
 						aria-expanded={expanded.has(idx)}
 						on:click={() => toggle(idx)}
 					>
-						{expanded.has(idx) ? '접기' : '더 보기'}
+						<div
+							class="text-xs leading-relaxed text-gray-500 dark:text-gray-400 whitespace-pre-line {expanded.has(
+								idx
+							)
+								? ''
+								: 'line-clamp-4'}"
+						>
+							{excerptText(citation)}
+						</div>
 					</button>
 				</div>
 			{/each}
