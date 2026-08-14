@@ -132,6 +132,7 @@
 					</div>
 					<button
 						class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+						aria-expanded={expanded.has(idx)}
 						on:click={() => toggle(idx)}
 					>
 						{expanded.has(idx) ? '접기' : '더 보기'}

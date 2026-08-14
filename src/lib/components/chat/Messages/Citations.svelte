@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { embed, showControls, showEmbeds, showSources, sourcesPanel } from '$lib/stores';
+	import { embed, showArtifacts, showControls, showEmbeds, showSources, sourcesPanel } from '$lib/stores';
 	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 
 	import CitationModal from './Citations/CitationModal.svelte';
@@ -27,6 +27,7 @@
 	const openSourcesPanel = (focusIdx: number | null = null) => {
 		sourcesPanel.set({ citations, messageId: id, chatId, focusIdx });
 		showEmbeds.set(false);
+		showArtifacts.set(false);
 		showSources.set(true);
 		showControls.set(true);
 	};
