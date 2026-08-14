@@ -97,7 +97,16 @@
 	};
 </script>
 
-<Modal size="3xl" bind:show>
+<!--
+	className: 기본값(bg-white/95 + backdrop-blur-sm, 반투명)을 불투명으로 오버라이드.
+	우측 Sources/Controls 패널(paneforge 리사이즈 패인)이 열려 있는 상태에서 이 모달을 열면,
+	카드의 반투명 배경(alpha<1, 특히 backdrop-filter 병행 시)이 Chromium에서 잘못된 레이어와
+	합성되어 패널 내용이 카드 위로 비쳐 보이는 렌더링 버그가 있음(z-index/DOM 순서는 정상 —
+	elementFromPoint 히트테스트는 항상 모달을 반환하나 래스터라이즈 결과만 어긋남).
+	카드를 완전 불투명으로 바꾸면(alpha=1) 이 버그가 사라짐 — 바깥 backdrop(반투명 검정)은
+	영향 없어 그대로 둠. 원복 시 패널을 켠 채 모달을 열어 재현 여부 확인할 것.
+-->
+<Modal size="3xl" bind:show className="bg-white dark:bg-gray-900 rounded-4xl">
 	<div>
 		<div class=" flex justify-between dark:text-gray-300 px-4.5 pt-3 pb-2">
 			<div class=" text-lg font-medium self-center flex items-center">
