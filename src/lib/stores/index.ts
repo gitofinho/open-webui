@@ -101,6 +101,7 @@ export const showControls = writable(false);
 export const showEmbeds = writable(false);
 export const showOverview = writable(false);
 export const showArtifacts = writable(false);
+export const showSources = writable(false);
 export const showCallOverlay = writable(false);
 export const showFileNav = writable(false);
 export const showFileNavPath: Writable<string | null> = writable(null);
@@ -111,6 +112,12 @@ export const artifactCode = writable(null);
 export const artifactContents = writable(null);
 
 export const embed = writable(null);
+export const sourcesPanel: Writable<{
+	citations: any[];
+	messageId: string;
+	chatId: string;
+	focusIdx: number | null;
+} | null> = writable(null);
 
 export const temporaryChatEnabled = writable(false);
 
