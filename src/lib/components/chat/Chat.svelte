@@ -255,6 +255,16 @@
 
 		clearTimeout(saveControlsTimer);
 		await saveControls();
+
+		// 세션 전환: 이전 세션의 출처가 패널에 남지 않게 정리한다.
+		// ChatControls 는 loading 토글로 재마운트되므로 전역 스토어를 여기서 꺼야 한다.
+		// 출처가 보이던 중이면 pane 도 접는다 — pane 만 남기면 폴백 탭("제어")이 대신 뜬다.
+		if ($showSources) {
+			showControls.set(false);
+			showSources.set(false);
+			sourcesPanel.set(null);
+		}
+
 		loading = true;
 
 		prompt = '';
@@ -1455,11 +1465,13 @@
 			}
 		}
 
-		if ($mobile) {
-			await showControls.set(false);
-		}
+		// 새 대화: 우측 패널을 통째로 접는다 — pane 만 남기면 폴백 탭("제어")이 뜬다.
+		// (call 진입은 이 아래 ?call=true / desktopEvent 분기가 다시 연다)
+		await showControls.set(false);
 		await showCallOverlay.set(false);
 		await showArtifacts.set(false);
+		await showSources.set(false);
+		sourcesPanel.set(null);
 
 		if ($page.url.pathname.includes('/c/')) {
 			window.history.replaceState(history.state, '', `/`);
