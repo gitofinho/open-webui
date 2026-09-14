@@ -4,8 +4,6 @@
 
 	import XMark from '$lib/components/icons/XMark.svelte';
 
-	export let overlay = false;
-
 	let panelEl: HTMLElement | null = null;
 	let expanded: Set<number> = new Set();
 	let focusIdx: number | null = null;
@@ -97,10 +95,6 @@
 		</div>
 
 		<div class="flex-1 min-h-0 overflow-y-auto px-3 pb-4 flex flex-col gap-2 relative">
-			{#if overlay}
-				<div class="absolute inset-0 z-10"></div>
-			{/if}
-
 			{#each $sourcesPanel.citations as citation, idx}
 				<div
 					id="source-card-{idx}"
