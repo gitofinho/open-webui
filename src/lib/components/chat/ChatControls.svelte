@@ -361,7 +361,7 @@
 				{:else if $showArtifacts}
 					<Artifacts {history} overlay={dragged} />
 				{:else if $showSources}
-					<Sources overlay={dragged} />
+					<Sources />
 				{:else}
 					<!-- Controls + Files tabs -->
 					<div class="flex flex-col h-full min-h-0">
