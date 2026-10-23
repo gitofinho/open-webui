@@ -10,6 +10,7 @@
 
 	import XMark from '$lib/components/icons/XMark.svelte';
 	import Sidebar from '$lib/components/icons/Sidebar.svelte';
+	import ArrowDownTray from '$lib/components/icons/ArrowDownTray.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
 
 	const i18n = getContext('i18n');
@@ -155,7 +156,20 @@
 					{$i18n.t('Citation')}
 				{/if}
 			</div>
-			<div class="flex items-center gap-2 self-center">
+			<div class="flex items-center gap-2 self-center shrink-0">
+				<!-- 원본 내려받기 — OWUI 파일로 등록된 출처(metadata.file_id)만. 제목 링크는 PDF를 새 탭에서
+				     열므로(inline) 버튼은 attachment=true로 형식과 무관하게 저장한다. 웹 출처는 내려받을 파일이 없다. -->
+				{#if mergedDocuments?.[0]?.metadata?.file_id}
+					<a
+						class="rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+						aria-label="원본 내려받기"
+						title="원본 내려받기"
+						href={`${WEBUI_API_BASE_URL}/files/${mergedDocuments[0].metadata.file_id}/content?attachment=true`}
+						download
+					>
+						<ArrowDownTray className="size-4" />
+					</a>
+				{/if}
 				{#if onOpenPanel}
 					<button
 						class="rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
