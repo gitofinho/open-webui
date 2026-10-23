@@ -167,7 +167,8 @@
 
 	onMount(async () => {
 		const redirectPath = $page.url.searchParams.get('redirect');
-		if ($user !== undefined) {
+		// hfx: null(401 만료 뒤 user.set(null))을 로그인으로 보면 (app) 레이아웃과 /auth↔/ 무한 리다이렉트
+		if ($user) {
 			goto(redirectPath || '/');
 		} else {
 			if (redirectPath) {
