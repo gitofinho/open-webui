@@ -9,6 +9,8 @@
 	import { isValidHttpUrl } from '$lib/utils';
 
 	import XMark from '$lib/components/icons/XMark.svelte';
+	import Sidebar from '$lib/components/icons/Sidebar.svelte';
+	import ArrowDownTray from '$lib/components/icons/ArrowDownTray.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
 
 	const i18n = getContext('i18n');
@@ -20,6 +22,11 @@
 	export let citation;
 	export let showPercentage = false;
 	export let showRelevance = true;
+	export let onOpenPanel: (() => void) | null = null;
+
+	// favicon 로드 실패(내부망 등) 시 아이콘만 숨긴다
+	let iconError = false;
+	$: if (citation) iconError = false;
 
 	let mergedDocuments = [];
 
@@ -96,10 +103,20 @@
 	};
 </script>
 
-<Modal size="lg" bind:show>
+<Modal size="full" bind:show>
 	<div>
 		<div class=" flex justify-between dark:text-gray-300 px-4.5 pt-3 pb-2">
-			<div class=" text-sm font-medium self-center flex items-center">
+			<div class=" text-sm font-medium self-center flex items-center gap-2 min-w-0">
+				{#if citation?.source?.url && !iconError}
+					<img
+						src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.url}"
+						alt=""
+						class="size-4.5 rounded-sm shrink-0"
+						on:error={() => {
+							iconError = true;
+						}}
+					/>
+				{/if}
 				{#if citation?.source?.name}
 					{@const document = mergedDocuments?.[0]}
 					{#if document?.metadata?.file_id || isValidHttpUrl(document.source?.url)}
@@ -130,20 +147,45 @@
 					{$i18n.t('Citation')}
 				{/if}
 			</div>
-			<button
-				class="self-center rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-				aria-label={$i18n.t('Close citation modal')}
-				on:click={() => {
-					show = false;
-				}}
-			>
-				<XMark className={'size-4'} />
-			</button>
+			<div class="flex items-center gap-3 self-center shrink-0">
+				<!-- 원본 내려받기 — OWUI 파일로 등록된 출처(metadata.file_id)만. 제목 링크는 PDF를 새 탭에서
+				     열므로(inline) 버튼은 attachment=true로 형식과 무관하게 저장한다. 웹 출처는 내려받을 파일이 없다. -->
+				{#if mergedDocuments?.[0]?.metadata?.file_id}
+					<a
+						class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+						aria-label="원본 내려받기"
+						title="원본 내려받기"
+						href={`${WEBUI_API_BASE_URL}/files/${mergedDocuments[0].metadata.file_id}/content?attachment=true`}
+						download
+					>
+						<ArrowDownTray className="size-4" />
+					</a>
+				{/if}
+				{#if onOpenPanel}
+					<button
+						class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+						aria-label="출처를 우측 패널로 보기"
+						title="출처를 우측 패널로 보기"
+						on:click={onOpenPanel}
+					>
+						<Sidebar className="size-4" />
+					</button>
+				{/if}
+				<button
+					class="rounded-lg p-1 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+					aria-label={$i18n.t('Close citation modal')}
+					on:click={() => {
+						show = false;
+					}}
+				>
+					<XMark className={'size-4'} />
+				</button>
+			</div>
 		</div>
 
 		<div class="flex flex-col md:flex-row w-full px-5 pb-5 md:space-x-4">
 			<div
-				class="flex flex-col w-full dark:text-gray-200 overflow-y-scroll max-h-[22rem] scrollbar-thin gap-1"
+				class="flex flex-col w-full dark:text-gray-200 overflow-y-scroll max-h-[80vh] scrollbar-thin gap-1"
 			>
 				{#each mergedDocuments as document, documentIdx}
 					<div class="flex flex-col w-full gap-2">

@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { embed, showControls, showEmbeds } from '$lib/stores';
+	import {
+		embed,
+		mobile,
+		showArtifacts,
+		showControls,
+		showEmbeds,
+		showSources,
+		sourcesPanel
+	} from '$lib/stores';
+	import Sidebar from '$lib/components/icons/Sidebar.svelte';
 	import { isValidHttpUrl } from '$lib/utils';
 
 	import CitationModal from './Citations/CitationModal.svelte';
@@ -11,9 +20,21 @@
 	export let chatId = '';
 
 	export let sources = [];
+	export let done = true;
 	export let readOnly = false;
 
-	let citations = [];
+	// hfx: 이 세션에서 스트리밍된 답변이 끝나면 출처 패널을 자동으로 연다.
+	// 저장된 채팅은 done=true로 마운트되어 wasStreaming이 서지 않으므로 안 열린다.
+	// 모바일은 Drawer가 화면 전체를 덮어 자동 오픈이 오히려 방해라 제외.
+	let wasStreaming = false;
+	let autoOpened = false;
+	$: if (!done) wasStreaming = true;
+	$: if (done && wasStreaming && !autoOpened && !readOnly && !$mobile && citations.length > 0) {
+		autoOpened = true;
+		openSourcesPanel();
+	}
+
+	let citations: any[] = [];
 	let showPercentage = false;
 	let showRelevance = true;
 
@@ -23,6 +44,21 @@
 	let showCitationModal = false;
 
 	let selectedCitation: any = null;
+
+	const openSourcesPanel = (focusIdx: number | null = null) => {
+		sourcesPanel.set({ citations, messageId: id, focusIdx });
+		showEmbeds.set(false);
+		showArtifacts.set(false);
+		showSources.set(true);
+		showControls.set(true);
+	};
+
+	// 스트리밍 중 새 source가 도착하면 열려 있는 패널(같은 메시지)에 반영.
+	// 참조 비교 가드 필수 — update가 store를 새 객체로 바꾸므로 가드 없이는
+	// 이 반응문이 자기 자신을 다시 트리거해 무한 루프가 된다.
+	$: if ($showSources && $sourcesPanel?.messageId === id && $sourcesPanel.citations !== citations) {
+		sourcesPanel.update((p) => (p ? { ...p, citations } : p));
+	}
 
 	export const showSourceModal = (sourceId) => {
 		let index;
@@ -124,7 +160,9 @@
 				}
 
 				if (id.startsWith('http://') || id.startsWith('https://')) {
-					_source = { ..._source, name: metadata?.external ? _source.name : id, url: id };
+					// hfx: 병합 키가 URL이어도 이미 있는 제목(name)을 URL로 덮어쓰지 않는다 —
+					// pipe가 보낸 HTML title이 표시 이름이고, URL은 url 필드로만 쓴다.
+					_source = { ..._source, name: _source?.name ?? id, url: _source?.url ?? id };
 				}
 
 				const existingSource = acc.find((item) => item.id === id);
@@ -166,10 +204,14 @@
 	citation={selectedCitation}
 	{showPercentage}
 	{showRelevance}
+	onOpenPanel={() => {
+		showCitationModal = false;
+		openSourcesPanel(citations.indexOf(selectedCitation));
+	}}
 />
 
 {#if citations.length > 0}
-	{@const urlCitations = citations.filter((c) => c?.source?.name?.startsWith('http'))}
+	{@const urlCitations = citations.filter((c) => c?.source?.url)}
 	<div class=" py-1 -mx-0.5 w-full flex gap-1 items-center flex-wrap">
 		<button
 			class="text-xs font-normal text-gray-600 dark:text-gray-300 px-3.5 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center gap-1 border border-gray-50 dark:border-gray-850/30"
@@ -185,7 +227,7 @@
 				<div class="flex -space-x-1 items-center">
 					{#each urlCitations.slice(0, 3) as citation, idx}
 						<img
-							src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.name}"
+							src="https://www.google.com/s2/favicons?sz=32&domain={citation.source.url}"
 							alt="favicon"
 							class="size-4 rounded-full shrink-0 border border-white dark:border-gray-850 bg-white dark:bg-gray-900"
 							on:error={(e) => {
@@ -215,6 +257,14 @@
 					})}
 				{/if}
 			</div>
+		</button>
+		<button
+			class="text-xs font-medium text-gray-600 dark:text-gray-300 px-2 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition flex items-center border border-gray-50 dark:border-gray-850/30"
+			aria-label="출처를 우측 패널로 보기"
+			title="출처를 우측 패널로 보기"
+			on:click={() => openSourcesPanel()}
+		>
+			<Sidebar className="size-4" />
 		</button>
 	</div>
 {/if}

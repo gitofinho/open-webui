@@ -14,6 +14,8 @@
 		showCallOverlay,
 		showArtifacts,
 		showEmbeds,
+		showSources,
+		sourcesPanel,
 		settings,
 		showFileNavPath,
 		selectedTerminalId,
@@ -27,6 +29,7 @@
 	import ResizableSidePanel from '../common/ResizableSidePanel.svelte';
 	import Artifacts from './Artifacts.svelte';
 	import Embeds from './ChatControls/Embeds.svelte';
+	import Sources from './ChatControls/Sources.svelte';
 	import FileNav from './FileNav.svelte';
 	import PyodideFileNav from './PyodideFileNav.svelte';
 	import Overview from './Overview.svelte';
@@ -200,13 +203,15 @@
 		}
 		showArtifacts.set(false);
 		showEmbeds.set(false);
+		showSources.set(false);
+		sourcesPanel.set(null);
 		if ($showCallOverlay) showCallOverlay.set(false);
 	};
 
 	$: if (mounted && !chatId) closeHandler();
 
 	// Helper: is a "special" full-screen panel active?
-	$: specialPanel = $showCallOverlay || $showArtifacts || $showEmbeds;
+	$: specialPanel = $showCallOverlay || $showArtifacts || $showEmbeds || $showSources;
 </script>
 
 <svelte:window bind:innerWidth={viewportWidth} />
@@ -255,6 +260,8 @@
 						<Embeds />
 					{:else if $showArtifacts}
 						<Artifacts {history} />
+					{:else if $showSources}
+						<Sources />
 					{:else}
 						<!-- Controls + Files tabs -->
 						<div class="flex flex-col h-full min-h-0">
@@ -379,6 +386,8 @@
 					<Embeds overlay={dragged} />
 				{:else if $showArtifacts}
 					<Artifacts {history} overlay={dragged} />
+				{:else if $showSources}
+					<Sources />
 				{:else}
 					<!-- Controls + Files tabs -->
 					<div class="flex flex-col h-full min-h-0">
