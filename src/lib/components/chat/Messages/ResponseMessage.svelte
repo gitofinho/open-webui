@@ -728,30 +728,6 @@
 							<StatusHistory statusHistory={message?.statusHistory} />
 						{/if}
 
-						{#if message?.files && message.files?.filter( (f) => ['image', 'file'].includes(f.type) ).length > 0}
-							<div
-								class="my-1 w-full flex overflow-x-auto gap-2 flex-wrap"
-								dir={$settings?.chatDirection ?? 'auto'}
-							>
-								{#each message.files.filter((f) => ['image', 'file'].includes(f.type)) as file}
-									<div>
-										{#if file.type === 'image' || (file?.content_type ?? '').startsWith('image/')}
-											<Image src={file.url} alt={file.name || $i18n.t('Generated Image')} />
-										{:else}
-											<FileItem
-												item={file}
-												url={file.url}
-												name={file.name}
-												type={file.type}
-												size={file?.size}
-												small={true}
-											/>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
-
 						{#if !readOnly && message?.embeds && message.embeds.length > 0}
 							<div
 								class="my-1 w-full flex overflow-x-auto gap-2 flex-wrap"
@@ -939,6 +915,31 @@
 
 							{#if message?.error}
 								<Error content={message?.error?.content ?? message.content} />
+							{/if}
+
+							<!-- hfx: 생성 파일 카드는 답 본문 아래(출처 위) — 업스트림은 본문 위(이미지 생성 결과 자리)라 긴 답이면 맨 위로 올라가야 내려받을 수 있었다 -->
+							{#if message?.files && message.files?.filter( (f) => ['image', 'file'].includes(f.type) ).length > 0}
+								<div
+									class="my-1 w-full flex overflow-x-auto gap-2 flex-wrap"
+									dir={$settings?.chatDirection ?? 'auto'}
+								>
+									{#each message.files.filter((f) => ['image', 'file'].includes(f.type)) as file}
+										<div>
+											{#if file.type === 'image' || (file?.content_type ?? '').startsWith('image/')}
+												<Image src={file.url} alt={file.name || $i18n.t('Generated Image')} />
+											{:else}
+												<FileItem
+													item={file}
+													url={file.url}
+													name={file.name}
+													type={file.type}
+													size={file?.size}
+													small={true}
+												/>
+											{/if}
+										</div>
+									{/each}
+								</div>
 							{/if}
 
 							{#if (message?.sources || message?.citations) && (model?.info?.meta?.capabilities?.citations ?? true)}
